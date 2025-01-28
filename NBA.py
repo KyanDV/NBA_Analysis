@@ -9,8 +9,9 @@ from sklearn.metrics import accuracy_score
 
 @st.cache_data
 def load_data():
-    df1 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/Data_NBA(2).xlsx')
-    df2 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/NBA(Salary).xlsx')
+    df1 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/Data_NBA(2).xlsx')
+    df2 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/NBA(Salary).xlsx')
+
     merged_df = pd.merge(df1, df2, on='Player', how='inner')
     merged_df['AST - TOV'] = merged_df['AST'] - merged_df['TOV']
     merged_df['BLK + STL'] = merged_df['BLK'] + merged_df['STL']
