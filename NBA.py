@@ -11,10 +11,6 @@ df1 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/
 df2 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/NBA(Salary).xlsx')
 merged_df = pd.merge(df1, df2, on='Player', how='inner')
 
-# Load the trained model
-with open('linear.pkl', 'rb') as file:
-    model = pickle.load(file)
-
 st.title("NBA Player Analysis")
 
 # Sidebar for navigation
