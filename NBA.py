@@ -7,8 +7,8 @@ import numpy as np
 import joblib
 
 # Load the datasets
-df1 = pd.read_excel(r'C:\Kampus\Semester 5\Data Mining\Data_NBA(2).xlsx')
-df2 = pd.read_excel(r'C:\Kampus\Semester 5\Data Mining\NBA(Salary).xlsx')
+df1 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/Data_NBA(2).xlsx')
+df2 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/NBA(Salary).xlsx')
 merged_df = pd.merge(df1, df2, on='Player', how='inner')
 
 # Load the trained model
