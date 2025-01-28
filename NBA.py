@@ -8,10 +8,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 @st.cache_data
-def load_data_with_models():
-    # Data preparation
-    df1 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/Data_NBA(2).xlsx')
-    df2 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/NBA(Salary).xlsx')
+def load_data():
+    df1 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/Data_NBA(2).xlsx')
+    df2 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/NBA(Salary).xlsx')
     merged_df = pd.merge(df1, df2, on='Player', how='inner')
     merged_df['AST - TOV'] = merged_df['AST'] - merged_df['TOV']
     merged_df['BLK + STL'] = merged_df['BLK'] + merged_df['STL']
@@ -31,24 +30,16 @@ def load_data_with_models():
     salary_threshold = merged_df['Salary'].mean()
     merged_df['Salary Player'] = (merged_df['Salary'] > salary_threshold).astype(int)
 
-    # Random Forest Model
+    # Random Forest
     y = merged_df['Quality Player']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
     rf_model.fit(X_train, y_train)
-    rf_accuracy = accuracy_score(y_test, rf_model.predict(X_test))
+    y_pred = rf_model.predict(X_test)
 
-    # KNN Model
-    knn_model = KNeighborsClassifier(n_neighbors=5)
-    knn_model.fit(X_train, y_train)
-    knn_accuracy = accuracy_score(y_test, knn_model.predict(X_test))
+    return merged_df, rf_model
 
-    return merged_df, rf_model, rf_accuracy, knn_model, knn_accuracy
-
-
-# Pastikan Anda memanggil load_data_with_models, bukan load_data
-merged_df, rf_model, rf_accuracy, knn_model, knn_accuracy = load_data_with_models()
-
+merged_df, rf_model = load_data()
 
 st.title("NBA Player Analysis and Classication")
 
@@ -63,10 +54,8 @@ option = st.sidebar.selectbox(
         "AST - TOV vs Salary",
         "BLK + STL vs Salary",
         "Quality Players",
-        "Quality Player (KNN)",
         "Classify Quality Player",
-        "Random Forest Accuracy", 
-        "KNN Accuracy",
+        "Random Forest Accuracy",
     ],
 )
 
@@ -104,35 +93,6 @@ if option == "Quality Players":
     quality_players = filtered_df[filtered_df['Quality Player'] == 1]
     st.write(f"Number of Quality Players: {len(quality_players)}")
     st.dataframe(quality_players[['Player', 'PTS', 'TRB', 'AST', 'BLK', 'STL', 'Quality Player', 'Salary Player']])
-
-elif option == "Quality Player (KNN)":
-    st.header("Classify Quality Player Status (KNN)")
-    player_stats = {
-        'PTS': st.number_input("Enter Points (PTS)", min_value=0, value=0),
-        'TRB': st.number_input("Enter Total Rebounds (TRB)", min_value=0, value=0),
-        'AST': st.number_input("Enter Assists (AST)", min_value=0, value=0),
-        'TOV': st.number_input("Enter Turnovers (TOV)", min_value=0, value=0),
-        'BLK': st.number_input("Enter Blocks (BLK)", min_value=0, value=0),
-        'STL': st.number_input("Enter Steals (STL)", min_value=0, value=0),
-        'eFG%': st.number_input("Enter Effective Field Goal Percentage (eFG%)", min_value=0.0, value=0.00),
-        '3P%': st.number_input("Enter 3-Point Percentage (3P%)", min_value=0.0, value=0.00),
-    }
-    ast_tov = player_stats['AST'] - player_stats['TOV']
-    blk_stl = player_stats['BLK'] + player_stats['STL']
-    input_data = np.array([
-        player_stats['PTS'],  
-        player_stats['eFG%'],
-        player_stats['TRB'], 
-        ast_tov, 
-        blk_stl, 
-        player_stats['3P%']
-    ]).reshape(1, -1)
-    classification = knn_model.predict(input_data)
-
-    if classification == 1:
-        st.success("This player is a Quality Player (KNN)!!!")
-    else:
-        st.warning("This player is not a Quality Player (KNN).")
 
 elif option == "PTS vs Salary":
     st.header("Points (PTS) vs. Salary")
@@ -253,12 +213,4 @@ elif option == "Random Forest Accuracy":
         st.success("This player is a Quality Player!!!")
     else:
         st.warning("This player is not a Quality Player.")
-
-elif option == "KNN Accuracy":
-    st.header("KNN Model Accuracy")
-    st.write(f"Model Accuracy: **{knn_accuracy * 100:.2f}%**")
-
-    # Visualisasi feature importance tidak relevan untuk KNN, jadi hanya tampilkan data
-    st.subheader("Note")
-    st.write("KNN does not provide feature importance directly, as it is a distance-based algorithm.")
 
