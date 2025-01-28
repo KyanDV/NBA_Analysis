@@ -9,8 +9,8 @@ from sklearn.metrics import accuracy_score
 
 @st.cache_data
 def load_data():
-    df1 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/Data_NBA(2).xlsx')
-    df2 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/NBA(Salary).xlsx')
+    df1 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/Data_NBA(2).xlsx')
+    df2 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/NBA(Salary).xlsx')
     merged_df = pd.merge(df1, df2, on='Player', how='inner')
     merged_df['AST - TOV'] = merged_df['AST'] - merged_df['TOV']
     merged_df['BLK + STL'] = merged_df['BLK'] + merged_df['STL']
@@ -55,6 +55,7 @@ option = st.sidebar.selectbox(
         "BLK + STL vs Salary",
         "Quality Players",
         "Classify Quality Player",
+        "Random Forest Accuracy",
     ],
 )
 
@@ -168,6 +169,33 @@ elif option == "Classify Quality Player":
         'eFG%': st.number_input("Enter Effective Field Goal Percentage (eFG%)", min_value=0.0, value=0.00),
         '3P%': st.number_input("Enter 3-Point Percentage (3P%)", min_value=0.0, value=0.00),
     }
+    
+elif option == "Random Forest Accuracy":
+    st.header("Random Forest Model Accuracy")
+    
+    # Hitung akurasi model
+    y = merged_df['Quality Player']
+    features = ['PTS', 'eFG%', 'TRB', 'AST - TOV', 'BLK + STL', '3P%']
+    X = merged_df[features]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_model.fit(X_train, y_train)
+    y_pred = rf_model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    # Tampilkan hasil akurasi
+    st.write(f"Model Accuracy: **{accuracy * 100:.2f}%**")
+    
+    # Tambahkan visualisasi jika diperlukan
+    st.subheader("Feature Importance")
+    feature_importance = rf_model.feature_importances_
+    fig, ax = plt.subplots()
+    sns.barplot(x=features, y=feature_importance, ax=ax)
+    ax.set_title("Feature Importance in Random Forest Model")
+    ax.set_ylabel("Importance Score")
+    ax.set_xlabel("Features")
+    st.pyplot(fig)
 
     ast_tov = player_stats['AST'] - player_stats['TOV']
     blk_stl = player_stats['BLK'] + player_stats['STL']
