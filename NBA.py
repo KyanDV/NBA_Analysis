@@ -8,10 +8,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 @st.cache_data
-def load_data():
-    df1 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/Data_NBA(2).xlsx')
-    df2 = pd.read_excel('https://raw.githubusercontent.com/KyanDV/NBA_Analysis/main/NBA(Salary).xlsx')
-
+def load_data_with_models():
+    # Data preparation
+    df1 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/Data_NBA(2).xlsx')
+    df2 = pd.read_excel('https://github.com/KyanDV/NBA_Analysis/blob/main/NBA(Salary).xlsx')
     merged_df = pd.merge(df1, df2, on='Player', how='inner')
     merged_df['AST - TOV'] = merged_df['AST'] - merged_df['TOV']
     merged_df['BLK + STL'] = merged_df['BLK'] + merged_df['STL']
@@ -31,21 +31,24 @@ def load_data():
     salary_threshold = merged_df['Salary'].mean()
     merged_df['Salary Player'] = (merged_df['Salary'] > salary_threshold).astype(int)
 
-    # Random Forest
+    # Random Forest Model
     y = merged_df['Quality Player']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
     rf_model.fit(X_train, y_train)
-    y_pred = rf_model.predict(X_test)
+    rf_accuracy = accuracy_score(y_test, rf_model.predict(X_test))
 
-    # KNN
+    # KNN Model
     knn_model = KNeighborsClassifier(n_neighbors=5)
     knn_model.fit(X_train, y_train)
     knn_accuracy = accuracy_score(y_test, knn_model.predict(X_test))
 
-    return merged_df, rf_model
+    return merged_df, rf_model, rf_accuracy, knn_model, knn_accuracy
 
-merged_df, rf_model = load_data()
+
+# Pastikan Anda memanggil load_data_with_models, bukan load_data
+merged_df, rf_model, rf_accuracy, knn_model, knn_accuracy = load_data_with_models()
+
 
 st.title("NBA Player Analysis and Classication")
 
